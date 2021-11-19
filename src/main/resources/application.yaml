@@ -1,0 +1,11 @@
+camunda.bpm:
+  admin-user:
+    id: demo
+    password: demo
+    firstName: Demo
+  filter:
+    create: All tasks
+  eventing:
+    execution: true
+    history: true
+    task: true

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_08jsax9" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.10.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:process id="limitRequestWorkflow" name="Limit Request Workflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0f17hda</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="reviewRequest" name="Review Request">
+      <bpmn:extensionElements>
+        <camunda:taskListener delegateExpression="${assignmentTaskListener}" event="create" id="assignToLineManager">
+          <camunda:field name="assignTo">
+            <camunda:string>LINE_MANAGER</camunda:string>
+          </camunda:field>
+          <camunda:field name="startBy">
+            <camunda:expression>${startBy}</camunda:expression>
+          </camunda:field>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0f17hda</bpmn:incoming>
+      <bpmn:outgoing>Flow_1t4ztt3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0f17hda" sourceRef="StartEvent_1" targetRef="reviewRequest" />
+    <bpmn:exclusiveGateway id="Gateway_1qgd548">
+      <bpmn:incoming>Flow_1t4ztt3</bpmn:incoming>
+      <bpmn:outgoing>approved</bpmn:outgoing>
+      <bpmn:outgoing>rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1t4ztt3" sourceRef="reviewRequest" targetRef="Gateway_1qgd548" />
+    <bpmn:sequenceFlow id="approved" name="Approved" sourceRef="Gateway_1qgd548" targetRef="Activity_1py7jvy">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${reviewRequestStatus == "approved"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_1py7jvy" name="Perform Limit Change" camunda:expression="${limitChangeService.changeLimit}">
+      <bpmn:incoming>approved</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="notifyRequester" name="Notify Requester" camunda:expression="${notificationService.sendNotification}">
+      <bpmn:incoming>rejected</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="rejected" name="Rejected" sourceRef="Gateway_1qgd548" targetRef="notifyRequester">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${reviewRequestStatus == "rejected"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="limitRequestWorkflow">
+      <bpmndi:BPMNEdge id="Flow_1ynnqa7_di" bpmnElement="rejected">
+        <di:waypoint x="520" y="142" />
+        <di:waypoint x="520" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="548" y="178" width="44" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01t5dhl_di" bpmnElement="approved">
+        <di:waypoint x="545" y="117" />
+        <di:waypoint x="650" y="117" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="574" y="99" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t4ztt3_di" bpmnElement="Flow_1t4ztt3">
+        <di:waypoint x="410" y="117" />
+        <di:waypoint x="495" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0f17hda_di" bpmnElement="Flow_0f17hda">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="310" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0uc2cum_di" bpmnElement="reviewRequest">
+        <dc:Bounds x="310" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1qgd548_di" bpmnElement="Gateway_1qgd548" isMarkerVisible="true">
+        <dc:Bounds x="495" y="92" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1e0igl5_di" bpmnElement="Activity_1py7jvy">
+        <dc:Bounds x="650" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18pmvr7_di" bpmnElement="notifyRequester">
+        <dc:Bounds x="470" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
